@@ -1,65 +1,63 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"strings"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
-// visible everywhere
-var name = "alex"
+type Product struct {
+	ID           int     `json:"id"`
+	ProductName  string  `json:"productname"`
+	ProductImage string  `json:"productimage"`
+	Price        float64 `json:"price"`
+	Category     string  `json:"category"`
+	Description  string  `json:"description"`
+}
+
+var product []Product
+
+/*
+
+ID           int     `json:"id"`
+	ProductName  string  `json:"productname"`
+	ProductImage string  `json:"productimage"`
+	Price        float64 `json:"price"`
+	Category     string  `json:"category"`
+	Description  string  `json:"description"`
+*/
+
+func getProducts(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(product)
+}
+
+func getProductByID(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Getting product by id")
+}
+
+func createProduct(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func deleteProductByID(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func updateProductByID(w http.ResponseWriter, r *http.Request) {
+
+}
 
 func main() {
-
-	// visible within the function
-	var user string
-	user = "alex"
-	fmt.Print(user)
-
-	// variable that never change use const
-
-	const name = 123
-	fmt.Print(name)
-	// short variable declaration
-	uni := "aleb"
-	fmt.Println("Hello World", uni)
-
-	//declare multiple variables in a single line
-	age, name1 := 23, "23"
-	fmt.Print(age, name1)
-
-	// golang is a typed language
-	var student string = "test"
-
-	/*
-		Basic Types
-		Integer -> int, int8, int16, int32, int64, rune,uint,uintptr,uint8,uint16,uint32, uint64
-		unit - unsigned int - double amt of values if no is not negative
-		Float -> float32, float64
-		Complex -> complex64, complex128
-		Byte -> byte - single ASCII characters
-		Strings -> sequence of bytes - are immutable
-		Booleans -> bool /true/false
-
-
-	*/
-	fmt.Println(len(student))
-	fmt.Println(student[0])
-	fmt.Println(student[0:2])
-	strings.HasPrefix("st", "te")
-
-	/*
-		strings are reference types
-		-if passing a string to a function, reference to the string will be copied not its value
-	*/
-
-	/*
-		Arrays -> sequence of items of a single type
-		Are value types - copying an array
-
-	*/
-	var arr []string = {"alex", "m"}
-
-
-	myarr := []string{"jan", "feb", "march", "july"}
-	fmt.Println(myarr)
+	product = append(product, Product{ID: 12, ProductName: "Mens Jacket", ProductImage: "jacket.jpg", Price: 23.9, Category: "Men", Description: "Man Jacket"})
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/api/products", getProducts).Methods("GET")
+	router.HandleFunc("/api/products/{id}", getProductByID).Methods("GET")
+	router.HandleFunc("/api/products", createProduct).Methods("POST")
+	router.HandleFunc("/api/products/{id}", deleteProductByID).Methods("DELETE")
+	router.HandleFunc("/api/products/{id}", updateProductByID).Methods("PUT")
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
