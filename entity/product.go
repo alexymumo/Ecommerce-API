@@ -1,10 +1,25 @@
 package entity
 
+import (
+	"html"
+	"strings"
+	"time"
+)
+
 type Product struct {
-	ID           int     `json:"id"`
-	ProductName  string  `json:"productname"`
-	ProductImage string  `json:"productimage"`
-	Price        float64 `json:"price"`
-	Category     string  `json:"category"`
-	Description  string  `json:"description"`
+	ID           uint      `gorm:"primary_key;auto_increment" json:"id"`
+	ProductName  string    `gorm:"size:255;not null" json:"productname"`
+	ProductImage string    `gorm:"size:255" json:"productimage"`
+	Price        float64   `gorm:"size:255" json:"price"`
+	Category     string    `gorm:"size:255" json:"category"`
+	Description  string    `gorm:"size:255" json:"description"`
+	CreatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"createdAt"`
+	UpdatedAt    time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updatedAt"`
+}
+
+func (p *Product) Prepare() {
+	p.ID = 0
+	p.ProductName = html.EscapeString(strings.TrimSpace(p.ProductName))
+	p.ProductImage = html.EscapeString(strings.TrimSpace(p.ProductImage))
+	p.Price = html.EscapeString(strings.TrimSpace(p.Price))
 }
