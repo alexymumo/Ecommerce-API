@@ -21,5 +21,8 @@ func (p *Product) Prepare() {
 	p.ID = 0
 	p.ProductName = html.EscapeString(strings.TrimSpace(p.ProductName))
 	p.ProductImage = html.EscapeString(strings.TrimSpace(p.ProductImage))
-	p.Price = html.EscapeString(strings.TrimSpace(p.Price))
+	p.Category = html.EscapeString(html.EscapeString(p.Category))
+	p.Description = html.EscapeString(html.EscapeString(p.Description))
+	p.CreatedAt = time.Now()
+	p.UpdatedAt = time.Now()
 }
