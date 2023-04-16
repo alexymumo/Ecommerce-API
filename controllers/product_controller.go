@@ -7,12 +7,14 @@ import (
 	"net/http"
 
 	"ecommerce/entity"
+	"ecommerce/responses"
 )
 
 var product []entity.Product
 
 type controller struct{}
 
+/*
 type ProductController interface {
 	GetProducts(w http.ResponseWriter, r *http.Request)
 	GetProductById(w http.ResponseWriter, r *http.Request)
@@ -20,16 +22,44 @@ type ProductController interface {
 	DeleteProductById(w http.ResponseWriter, r *http.Request)
 	UpdateProduct(w http.ResponseWriter, r *http.Request)
 }
+*/
 
-func (*controller) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	prod, _ := ioutil.ReadAll(r.Body)
+func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
+
+	// deprecated in go 1.16
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	product := entity.Product{}
+	err = json.Unmarshal(body, &product)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	product.Prepare()
+	err = product.Validate()
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	products, err := product.SaveProduct(server.DB)
+	if err != nil {
+		responses.ERROR()
+	}
+
+	//body, err := ioutil.ReadAll(r.Body)
+
+	/*prod, _ := ioutil.ReadAll(r.Body)
 	var createProduct entity.Product
 	prod = append(prod, prod...)
 	json.NewEncoder(w).Encode(createProduct)
+	*/
 }
 
-func (*controller) GetProducts(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	product = []entity.Product{
 		{ID: 12, ProductName: "Mens Jacket", ProductImage: "jacket.jpg", Price: 23.9, Category: "Men", Description: "Man Jacket"},
@@ -39,12 +69,12 @@ func (*controller) GetProducts(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (*controller) DeleteProductById(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteProductById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, "Product deleted")
 }
 
-func (*controller) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (server *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, "Updated product")
 }

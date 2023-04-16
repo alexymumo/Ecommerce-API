@@ -1,9 +1,12 @@
 package entity
 
 import (
+	"errors"
 	"html"
 	"strings"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Product struct {
@@ -25,4 +28,24 @@ func (p *Product) Prepare() {
 	p.Description = html.EscapeString(html.EscapeString(p.Description))
 	p.CreatedAt = time.Now()
 	p.UpdatedAt = time.Now()
+}
+
+func (p *Product) Validate() error {
+	if p.ProductName == "" {
+		return errors.New("ProductName Required")
+	}
+	if p.Category == "" {
+		return errors.New("Category Required")
+	}
+	return nil
+}
+
+// save product
+func (p *Product) SaveProduct(db *gorm.DB) (*Product, error) {
+	var err error
+	err = db.Debug().Model(&Product{}).Create(&p).Error
+	if err != nil {
+		return &Product{}, err
+	}
+	return p, nil
 }
