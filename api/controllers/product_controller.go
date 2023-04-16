@@ -6,13 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"ecommerce/entity"
-	"ecommerce/responses"
+	"ecommerce/api/entity"
+	"ecommerce/api/responses"
 )
-
-var product []entity.Product
-
-type controller struct{}
 
 /*
 type ProductController interface {
@@ -47,25 +43,22 @@ func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	}
 	products, err := product.SaveProduct(server.DB)
 	if err != nil {
-		responses.ERROR()
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
 	}
-
-	//body, err := ioutil.ReadAll(r.Body)
-
-	/*prod, _ := ioutil.ReadAll(r.Body)
-	var createProduct entity.Product
-	prod = append(prod, prod...)
-	json.NewEncoder(w).Encode(createProduct)
-	*/
+	responses.JSON(w, http.StatusCreated, products)
 }
 
 func (server *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
-	product = []entity.Product{
+	fmt.Fprintf(w, "All Products")
+	/*product = []entity.Product{
 		{ID: 12, ProductName: "Mens Jacket", ProductImage: "jacket.jpg", Price: 23.9, Category: "Men", Description: "Man Jacket"},
 		{ID: 123, ProductName: "Phone", ProductImage: "jacket.png", Price: 23.4, Category: "Tech", Description: "Electronics"},
 	}
+
 	json.NewEncoder(w).Encode(product)
+	*/
 
 }
 
