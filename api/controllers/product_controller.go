@@ -49,16 +49,13 @@ func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
-
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprintf(w, "All Products")
-	/*product = []entity.Product{
-		{ID: 12, ProductName: "Mens Jacket", ProductImage: "jacket.jpg", Price: 23.9, Category: "Men", Description: "Man Jacket"},
-		{ID: 123, ProductName: "Phone", ProductImage: "jacket.png", Price: 23.4, Category: "Tech", Description: "Electronics"},
+	product := entity.Product{}
+	products, err := product.GetProducts(server.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
 	}
-
-	json.NewEncoder(w).Encode(product)
-	*/
+	responses.JSON(w, http.StatusOK, products)
 
 }
 

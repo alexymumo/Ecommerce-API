@@ -49,3 +49,13 @@ func (p *Product) SaveProduct(db *gorm.DB) (*Product, error) {
 	}
 	return p, nil
 }
+
+func (p *Product) GetProducts(db *gorm.DB) (*[]Product, error) {
+	var err error
+	products := []Product{}
+	err = db.Debug().Model(&Product{}).Find(&products).Error
+	if err != nil {
+		return &[]Product{}, err
+	}
+	return &products, nil
+}
