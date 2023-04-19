@@ -50,6 +50,17 @@ func (p *Product) SaveProduct(db *gorm.DB) (*Product, error) {
 	return p, nil
 }
 
+func (p *Product) DeleteProduct(db *gorm.DB, productID uint64, uid uint32) (int64, error) {
+	db = db.Debug().Model(&Product{}).Where("", productID, uid).Take(&Product{}).Delete(&Product{})
+
+	if db != nil {
+		if gorm.IsRecordNotFoundError(db.Error) {
+			return 0, errors.New("Not found")
+		}
+	}
+	return db.RowsAffected, nil
+}
+
 func (p *Product) GetProducts(db *gorm.DB) (*[]Product, error) {
 	var err error
 	products := []Product{}
@@ -58,4 +69,8 @@ func (p *Product) GetProducts(db *gorm.DB) (*[]Product, error) {
 		return &[]Product{}, err
 	}
 	return &products, nil
+}
+
+func (p *Product) GetProductById(db *gorm.DB, productId uint64) (*Product, error) {
+
 }
