@@ -2,23 +2,17 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"ecommerce/api/entity"
 	"ecommerce/api/responses"
-)
 
-/*
-type ProductController interface {
-	GetProducts(w http.ResponseWriter, r *http.Request)
-	GetProductById(w http.ResponseWriter, r *http.Request)
-	CreateProduct(w http.ResponseWriter, r *http.Request)
-	DeleteProductById(w http.ResponseWriter, r *http.Request)
-	UpdateProduct(w http.ResponseWriter, r *http.Request)
-}
-*/
+	"github.com/gorilla/mux"
+)
 
 func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
@@ -48,6 +42,9 @@ func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, products)
 }
 
+/*
+Get all products
+*/
 func (server *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
 	product := entity.Product{}
 	products, err := product.GetProducts(server.DB)
@@ -60,8 +57,27 @@ func (server *Server) GetProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (server *Server) DeleteProductById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, "Product deleted")
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	product := entity.Product{}
+	err = server.DB.Debug().Model(entity.Product{}).Where("id = ?", id).Take(&product).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, errors.New("Not found"))
+		return
+	}
+	_, err = product.DeleteProduct(server.DB, uint64(id))
+
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	w.Header().Set("Entity", fmt.Sprintf("%d", id))
+	responses.JSON(w, http.StatusNoContent, "")
+
 }
 
 func (server *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
