@@ -38,6 +38,17 @@ func (server *Server) CreateUser(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusCreated, users)
 }
 
+func (server *Server) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+	user := entity.User{}
+	users, err := user.GetUsers(server.DB)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, users)
+
+}
+
 func (server *Server) DeleteUserById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	user := entity.User{}
