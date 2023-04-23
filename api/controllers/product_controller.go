@@ -84,3 +84,7 @@ func (server *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, "Updated product")
 }
+
+func (server *Server) SearchProducts(w http.ResponseWriter, r *http.Request) {
+
+}

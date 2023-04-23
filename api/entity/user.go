@@ -62,3 +62,13 @@ func (u *User) DeleteUser(db *gorm.DB, uid int32) (int64, error) {
 	}
 	return db.RowsAffected, nil
 }
+
+func (u *User) GetUsers(db *gorm.DB) (*[]User, error) {
+	var err error
+	users := []User{}
+	err = db.Debug().Model(&User{}).Find(&users).Error
+	if err != nil {
+		return &[]User{}, err
+	}
+	return &users, nil
+}
