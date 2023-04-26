@@ -15,8 +15,6 @@ import (
 )
 
 func (server *Server) CreateProduct(w http.ResponseWriter, r *http.Request) {
-
-	// deprecated in go 1.16
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		responses.ERROR(w, http.StatusUnprocessableEntity, err)
@@ -81,8 +79,47 @@ func (server *Server) DeleteProductById(w http.ResponseWriter, r *http.Request) 
 }
 
 func (server *Server) UpdateProduct(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, "Updated product")
+	vars := mux.Vars(r)
+	productId, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		responses.ERROR(w, http.StatusBadRequest, err)
+		return
+	}
+	product := entity.Product{}
+	err = server.DB.Debug().Model(entity.Product{}).Where("id = ?", productId).Take(&product).Error
+	if err != nil {
+		responses.ERROR(w, http.StatusNotFound, errors.New("Not found"))
+		return
+	}
+
+	product_body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	updated_product := entity.Product{}
+
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	updated_product.Prepare()
+	err = json.Unmarshal(product_body, &updated_product)
+	if err != nil {
+		responses.ERROR(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+	updated_product.ID = product.ID
+
+	update, err := product.UpdateProduct(server.DB)
+
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, update)
+
 }
 
 func (server *Server) SearchProducts(w http.ResponseWriter, r *http.Request) {

@@ -89,6 +89,15 @@ func (p *Product) SearchProductsByName(db *gorm.DB) (*[]Product, error) {
 	return &products, nil
 }
 
+func (p *Product) UpdateProduct(db *gorm.DB) (*Product, error) {
+	//var err error
+	err := db.Debug().Model(&Product{}).Where("id = ?").Updates(Product{ProductName: p.ProductName, Price: p.Price}).Error
+	if err != nil {
+		return &Product{}, err
+	}
+	return p, err
+}
+
 func (p *Product) GetProductById(db *gorm.DB, productId uint64) (*Product, error) {
 	//var err error
 	err := db.Debug().Model(&Product{}).Where("id=?", productId).Take(&p).Error
