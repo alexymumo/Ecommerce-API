@@ -3,14 +3,18 @@ package entity
 import (
 	"errors"
 	"html"
+	"mime/multipart"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/session"
 
 	"github.com/jinzhu/gorm"
 )
 
 type Product struct {
-	ID           uint      `gorm:"primary_key;auto_increment" json:"id"`
+	ID           uint32    `gorm:"primary_key;auto_increment" json:"id"`
+	UserID       uint32    `gorm:"not null" json:"userid"`
 	ProductName  string    `gorm:"size:255;not null" json:"productname"`
 	ProductImage string    `gorm:"size:255" json:"productimage"`
 	Price        float64   `gorm:"size:255" json:"price"`
@@ -26,7 +30,7 @@ func (p *Product) Prepare() {
 	p.ID = 0
 	p.ProductName = html.EscapeString(strings.TrimSpace(p.ProductName))
 	p.ProductImage = html.EscapeString(strings.TrimSpace(p.ProductImage))
-	p.Category = html.EscapeString(html.EscapeString(p.Category))
+	p.Category = html.EscapeString(strings.TrimSpace(p.Category))
 	p.Description = html.EscapeString(html.EscapeString(p.Description))
 	p.User = User{}
 	p.Rating = Rating{}
@@ -43,7 +47,6 @@ func (p *Product) Validate() error {
 	}
 	if p.Description == "" {
 		return errors.New("description required")
-
 	}
 	return nil
 }
@@ -79,6 +82,10 @@ func (p *Product) GetProducts(db *gorm.DB) (*[]Product, error) {
 	return &products, nil
 }
 
+func UploadImage(path string, s *session.Session, file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+
+}
+
 func (p *Product) SearchProductsByName(db *gorm.DB) (*[]Product, error) {
 	var err error
 	products := []Product{}
@@ -89,24 +96,35 @@ func (p *Product) SearchProductsByName(db *gorm.DB) (*[]Product, error) {
 	return &products, nil
 }
 
-func (p *Product) UpdateProduct(db *gorm.DB) (*Product, error) {
+func (p *Product) UpdateProduct(db *gorm.DB, productId uint32) (*Product, error) {
 	//var err error
-	err := db.Debug().Model(&Product{}).Where("id = ?").Updates(Product{ProductName: p.ProductName, Price: p.Price}).Error
+	db = db.Debug().Model(&Product{}).Where("id = ?").Take(&Product{}).UpdateColumns(
+		map[string]interface{}{
+			"id":           p.ID,
+			"product_name": p.ProductName,
+			"price":        p.Price,
+			"updated_at":   time.Now(),
+		},
+	)
+	if db.Error != nil {
+		return &Product{}, db.Error
+	}
+	err := db.Debug().Model(&Product{}).Where("id = ?", productId).Take(&p).Error
 	if err != nil {
 		return &Product{}, err
 	}
-	return p, err
+	return p, nil
 }
 
 func (p *Product) GetProductById(db *gorm.DB, productId uint64) (*Product, error) {
 	//var err error
-	err := db.Debug().Model(&Product{}).Where("id=?", productId).Take(&p).Error
+	err := db.Debug().Model(&Product{}).Where("id = ?", productId).Take(&p).Error
 	if err != nil {
 		return &Product{}, err
 	}
-	/*if p.ID != 0 {
-
-	}*/
+	if p.ID != 0 {
+		err = db.Debug().Model(&Product{}).Where("id = ?", productId).Take(&p).Error
+	}
 	return p, nil
 
 }
