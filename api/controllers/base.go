@@ -32,7 +32,7 @@ func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, D
 		}
 	}
 
-	server.DB.Debug().AutoMigrate(&entity.User{}, &entity.Cart{}, &entity.Product{})
+	server.DB.Debug().AutoMigrate(&entity.Product{}, &entity.User{}, &entity.Cart{})
 	server.Router = mux.NewRouter()
 	server.setupRoutes()
 }

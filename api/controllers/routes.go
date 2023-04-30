@@ -8,10 +8,12 @@ func (s *Server) setupRoutes() {
 	s.Router.HandleFunc("/v1/product/test", middlewares.SetMiddlewareJson(s.TestServer)).Methods("GET")
 
 	// product endpoints
-	s.Router.HandleFunc("/v1/product", middlewares.SetMiddlewareJson(s.CreateProduct)).Methods("POST")
-	s.Router.HandleFunc("/v1/product{id}", middlewares.SetMiddlewareJson(s.DeleteProductById)).Methods("DELETE")
+	s.Router.HandleFunc("/v1/products", middlewares.SetMiddlewareJson(s.CreateProduct)).Methods("POST")
+	s.Router.HandleFunc("/v1/products/{id}", middlewares.SetMiddlewareJson(s.DeleteProductById)).Methods("DELETE")
 	s.Router.HandleFunc("/v1/products", middlewares.SetMiddlewareJson(s.GetProducts)).Methods("GET")
 	s.Router.HandleFunc("/v1/product/{id}", middlewares.SetMiddlewareJson(s.UpdateProduct)).Methods("PUT")
+	s.Router.HandleFunc("/v1/product/search", middlewares.SetMiddlewareJson(s.SearchProducts)).Methods("GET")
+	s.Router.HandleFunc("/v1/product/{id}", middlewares.SetMiddlewareJson(s.GetProductByID)).Methods("GET")
 
 	// user endpoints
 	s.Router.HandleFunc("/v1/user", middlewares.SetMiddlewareJson(s.CreateUser)).Methods("POST")
