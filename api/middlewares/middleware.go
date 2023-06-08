@@ -13,12 +13,6 @@ func SetMiddlewareJson(next http.HandlerFunc) http.HandlerFunc {
 
 func SetAuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		/*err := auth.TokenValid(r)
-		if err != nil {
-			responses.ERROR(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-		}
-		*/
 		next(w, r)
 	}
 }
